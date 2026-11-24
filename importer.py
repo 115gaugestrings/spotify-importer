@@ -26,11 +26,21 @@ print(len(good_plays))
 print(good_plays[0])
 
 end = datetime.now()
-begin = end - timedelta(hours=24)
+progress_file = Path("progress.json")
+if progress_file.exists():
+    with open(progress_file, encoding="utf-8") as f:
+        saved = json.load(f)
+    start_index = saved['next_index']
+    begin = datetime.fromisoformat(saved['last_end'])
+else:
+    start_index = 0
+    begin = end - timedelta(hours=24)
+print(start_index)
+
 gap = (end - begin) / 2800
 print(gap)
 
-todays_plays = good_plays[:2800]
+todays_plays = good_plays[start_index : start_index + 2800]
 i = 0
 for play in todays_plays:
     play['newTime'] = (begin + gap * i)
@@ -38,3 +48,8 @@ for play in todays_plays:
 print(todays_plays[0]['newTime'])
 print(todays_plays[-1]['newTime'])
 
+progress = {'next_index': start_index + len(todays_plays), 'last_end': end.isoformat()}
+print(progress)
+
+with open("progress.json", "w", encoding="utf-8") as f:
+    json.dump(progress, f)
