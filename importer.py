@@ -3,6 +3,8 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import sys
 import hashlib
+import urllib.parse
+import urllib.request
 DAILY_LIMIT = 2800
 DRY_RUN = True
 with open("config.json", encoding="utf-8") as f:
@@ -86,3 +88,9 @@ params = {'method': 'auth.getToken', 'api_key': API_KEY}
 params['api_sig'] = sign(params)
 params['format'] = 'json'
 print(sorted(params))
+
+url = "https://ws.audioscrobbler.com/2.0/?" + urllib.parse.urlencode(params)
+request = urllib.request.Request(url, headers={'User-Agent': 'spotify-importer/0.1'})
+with urllib.request.urlopen(request) as response:
+    reply = json.load(response)
+print(reply)
