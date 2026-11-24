@@ -24,3 +24,17 @@ for play in all_plays:
         good_plays.append(play)
 print(len(good_plays))
 print(good_plays[0])
+
+end = datetime.now()
+begin = end - timedelta(hours=24)
+gap = (end - begin) / 2800
+print(gap)
+
+todays_plays = good_plays[:2800]
+i = 0
+for play in todays_plays:
+    play['newTime'] = (begin + gap * i)
+    i = i + 1
+print(todays_plays[0]['newTime'])
+print(todays_plays[-1]['newTime'])
+
