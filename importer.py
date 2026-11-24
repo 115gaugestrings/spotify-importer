@@ -12,19 +12,15 @@ for n in range(4):
     print(len(batch))
 print(len(all_plays))
 
-count = 0
+good_plays = []
 for play in all_plays:
     artistName = play['artistName']
     trackName = play['trackName']
     msPlayed = play['msPlayed']
     if msPlayed > 30000 and artistName is not None and trackName is not None:
-        count = count + 1
-print(count)
-
-endTime = all_plays[0]['endTime']
-moment = datetime.strptime(endTime, "%Y-%m-%d %H:%M")
-print(moment)
-
-msPlayed = all_plays[0]['msPlayed']
-start = moment - timedelta(milliseconds=msPlayed)
-print(start)
+        moment = datetime.strptime(play['endTime'], "%Y-%m-%d %H:%M")
+        start = moment - timedelta(milliseconds=msPlayed)
+        play['startTime'] = start
+        good_plays.append(play)
+print(len(good_plays))
+print(good_plays[0])
