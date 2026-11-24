@@ -84,13 +84,26 @@ def describe(play):
     return message
 print(describe(good_plays[0]))
 
-params = {'method': 'auth.getToken', 'api_key': API_KEY}
-params['api_sig'] = sign(params)
-params['format'] = 'json'
-print(sorted(params))
+def call_lastfm(params):
+    params['api_key'] = API_KEY
+    params['api_sig'] = sign(params)
+    params['format'] = 'json'
+    url = "https://ws.audioscrobbler.com/2.0/?" + urllib.parse.urlencode(params)
+    request = urllib.request.Request(url, headers={'User-Agent': 'spotify-importer/0.1'})
+    with urllib.request.urlopen(request) as response:
+        reply = json.load(response)
+    return reply
 
-url = "https://ws.audioscrobbler.com/2.0/?" + urllib.parse.urlencode(params)
-request = urllib.request.Request(url, headers={'User-Agent': 'spotify-importer/0.1'})
-with urllib.request.urlopen(request) as response:
-    reply = json.load(response)
-print(reply)
+if 'session_key' in config:
+    SESSION_KEY = config['session_key']
+else:
+    reply = call_lastfm({'method': 'auth.getToken'})
+    token = reply['token']
+    print(f"Open this link and allow access: https://www.last.fm/api/auth/?api_key={API_KEY}&token={token}")
+    input("Press Enter after you've allowed access...")
+    session_reply = call_lastfm({'method': 'auth.getSession', 'token': token})
+    SESSION_KEY = session_reply['session']['key']
+    config['session_key'] = SESSION_KEY
+    with open("config.json", "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=2)
+print("Logged in. Session key length:", len(SESSION_KEY))
