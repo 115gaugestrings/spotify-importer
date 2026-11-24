@@ -2,7 +2,22 @@ import json
 from pathlib import Path
 from datetime import datetime, timedelta
 import sys
+import hashlib
 DAILY_LIMIT = 2800
+DRY_RUN = True
+with open("config.json", encoding="utf-8") as f:
+    config = json.load(f)
+
+API_KEY = config['api_key']
+API_SECRET = config['api_secret']
+def sign(params):
+    joined = ""
+    for name in sorted(params):
+        joined = joined + name + params[name]
+    joined = joined + API_SECRET
+    return hashlib.md5(joined.encode("utf-8")).hexdigest()
+print(len(API_KEY), len(API_SECRET))
+
 folder = Path.home() / "Desktop" / "spotify-data"
 all_plays = []
 for n in range(4):
@@ -58,5 +73,16 @@ print(todays_plays[-1]['newTime'])
 progress = {'next_index': start_index + len(todays_plays), 'last_end': end.isoformat()}
 print(progress)
 
-with open("progress.json", "w", encoding="utf-8") as f:
-    json.dump(progress, f)
+if not True:
+    with open("progress.json", "w", encoding="utf-8") as f:
+        json.dump(progress, f)
+
+def describe(play):
+    message = f"{play['artistName']} - {play['trackName']}"
+    return message
+print(describe(good_plays[0]))
+
+params = {'method': 'auth.getToken', 'api_key': API_KEY}
+params['api_sig'] = sign(params)
+params['format'] = 'json'
+print(sorted(params))
