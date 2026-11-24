@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 from datetime import datetime, timedelta
+import sys
+DAILY_LIMIT = 2800
 folder = Path.home() / "Desktop" / "spotify-data"
 all_plays = []
 for n in range(4):
@@ -37,10 +39,15 @@ else:
     begin = end - timedelta(hours=24)
 print(start_index)
 
-gap = (end - begin) / 2800
-print(gap)
+oldest_allowed = end - timedelta(days=13)
+if begin < oldest_allowed:
+    begin = oldest_allowed
 
-todays_plays = good_plays[start_index : start_index + 2800]
+todays_plays = good_plays[start_index : start_index + DAILY_LIMIT]
+if len(todays_plays) == 0:
+    sys.exit("All plays have been scrobbled :D")
+gap = (end - begin) / len(todays_plays)
+print(gap)
 i = 0
 for play in todays_plays:
     play['newTime'] = (begin + gap * i)
